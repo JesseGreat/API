@@ -1,1 +1,1 @@
-Api endpoints for an ecommerce website
+Api endpoints for restaurant web and mobile application
