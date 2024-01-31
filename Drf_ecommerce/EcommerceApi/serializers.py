@@ -5,42 +5,54 @@ from rest_framework import serializers
 from .models import MenuItem, CustomUser, Cart, Category, Order, OrderItem
 
 class CustomUserCreateSerializer(UserCreateSerializer):
-    class Meta(UserCreateSerializer.Meta):
+    class Meta:
         model = CustomUser
-        fields = ['username', 'email']
+        fields = ['id','username','email']
         
 class MenuItemSerializer(serializers.ModelSerializer):
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all()
+    )
+    # category = CategorySerializer(read_only=True)
     class Meta:
         model = MenuItem
         fields = '__all__'
 
 class CartSerializer(serializers.ModelSerializer):
-    class Meta:
+     user = serializers.PrimaryKeyRelatedField(
+        queryset=CustomUser.objects.all(),
+        default=serializers.CurrentUserDefault()
+    )
+     
+     def validate(self, attrs):
+        attrs['price'] = attrs['quantity'] * attrs['unit_price']
+        return attrs
+     class Meta:
         model = Cart
-        fields = ['id', 'user', 'menuitem', 'quantity', 'unit_price', 'price']
+        fields = ['user', 'menuitem', 'unit_price', 'quantity', 'price']
+        extra_kwargs = {
+            'price': {'read_only': True}
+        }
         
-    def create(self, validated_data):
-        validated_data['price'] = validated_data['unit_price'] * validated_data['quantity']
-        return super().create(validated_data)
     
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
-
-class OrderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = ['id', 'user', 'delivery_crew', 'status', 'total', 'date']
+        fields =  fields = ['id', 'title', 'slug']
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    # quantity = CustomSmallIntegerField()
-    price = serializers.SerializerMethodField(method_name='total_price')
     class Meta:
         model = OrderItem
-        fields = ['id', 'order', 'menuitem', 'quantity', 'unit_price', 'price']
+        fields = ['order', 'menuitem', 'quantity', 'price']
         
-    def total_price(self, product:OrderItem):
-        return product.unit_price * product.quantity
+        
+class OrderSerializer(serializers.ModelSerializer):
+     orderitem = OrderItemSerializer(many=True, read_only=True, source='order')
+     class Meta:
+        model = Order
+        fields = ['id', 'user', 'delivery_crew',
+                  'status', 'date', 'total', 'orderitem']
+
+
 
 

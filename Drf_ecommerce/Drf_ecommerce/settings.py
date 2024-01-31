@@ -44,7 +44,16 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_xml',
     'djoser',
+    'drf_yasg',
 ]
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        }
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -135,24 +144,31 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework_xml.renderers.XMLRenderer',
     ],
+    
+    'DEFAULT_FILTER_BACKENDS': [
+        'rest_framework.filters.OrderingFilter',
+        'rest_framework.filters.SearchFilter',
+    ],
+    
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
        # Using DRF's default pagination classes
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 3,
     
-     # used for function and class-based function throttling to set throttle rate
-    'DEFAULT_THROTTLE_RATES': {
-        'anon':'2/minute', # you can also use second, hour, or day
-        'user':'10/minute',
-    },
+    #  # used for function and class-based function throttling to set throttle rate
+    # 'DEFAULT_THROTTLE_RATES': {
+    #     'anon':'2/minute', # you can also use second, hour, or day
+    #     'user':'10/minute',
+    # },
     
-    # for class based throttling
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle',
-    ]
+    # # for class based throttling
+    # 'DEFAULT_THROTTLE_CLASSES': [
+    #     'rest_framework.throttling.AnonRateThrottle',
+    #     'rest_framework.throttling.UserRateThrottle',
+    # ]
 }
 AUTH_USER_MODEL = 'EcommerceApi.CustomUser'
